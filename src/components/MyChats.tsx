@@ -6,9 +6,9 @@ import { IoMdAddCircle } from "react-icons/io";
 import ChatLoading from "./ChatLoading";
 import { getSender } from "../config/Chatlogics";
 import GroupChatModal from "./miscellaneous/GroupChatModal";
-const MyChats = () => {
+const MyChats = ({ fetchAgain }: { fetchAgain: any }) => {
   const [loggedUser, setloggedUser] = useState();
-  const { selectedChat, setSelectedChat, user, chats, setChats } = ChatState();
+  const { selectChat, setSelectedChat, user, chats, setChats } = ChatState();
   const toast = useToast();
 
   const fetchChats = async () => {
@@ -40,11 +40,11 @@ const MyChats = () => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo") as any);
     setloggedUser(userInfo);
     fetchChats();
-  }, []);
+  }, [fetchAgain]);
 
   return (
     <Box
-      display={{ base: selectedChat ? "none" : "flex", md: "flex" }}
+      display={{ base: selectChat ? "none" : "flex", md: "flex" }}
       flexDir="column"
       alignItems="center"
       p={3}
@@ -90,8 +90,8 @@ const MyChats = () => {
               <Box
                 onClick={() => setSelectedChat(chat)}
                 cursor="pointer"
-                bg={selectedChat?._id === chat._id ? "#38B2AC" : "#E8E8E8"}
-                color={selectedChat?._id === chat._id ? "white" : "black"}
+                bg={selectChat?._id === chat._id ? "#38B2AC" : "#E8E8E8"}
+                color={selectChat?._id === chat._id ? "white" : "black"}
                 px={3}
                 py={2}
                 borderRadius="lg"

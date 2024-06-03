@@ -76,7 +76,54 @@ const GroupChatModal = ({ children }: { children: any }) => {
       return;
     }
   };
-  const handleSubmit = async () => {};
+  const handleSubmit = async () => {
+    if (!groupChatName || !selectedUsers) {
+      toast({
+        title: "Please fill all the fields",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+        position: "top",
+      });
+      return;
+    }
+
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${user?.data?.token}`,
+        },
+      };
+      const { data } = await axios.post(
+        "http://localhost:3000/api/chat/create-group-chat",
+        {
+          name: groupChatName,
+          users: JSON.stringify(selectedUsers.map((u: any) => u._id)),
+        },
+        config
+      );
+      // console.log(data);
+      // return;
+      setChats([data?.data, ...chats]);
+      onClose();
+      toast({
+        title: "New Group Chat Created",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to create group chat",
+
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
+    }
+  };
   const handleDelete = async (user: any) => {
     setSelectedUsers(
       selectedUsers.filter((sel: any) => sel?._id !== user?._id)

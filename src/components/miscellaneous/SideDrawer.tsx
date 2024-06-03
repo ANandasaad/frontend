@@ -107,6 +107,7 @@ const SideDrawer = () => {
       );
 
       const chatData = response.data.data;
+      console.log(chatData);
 
       if (!chats.find((c: any) => c._id === chatData._id)) {
         setChats([chatData, ...chats]);
