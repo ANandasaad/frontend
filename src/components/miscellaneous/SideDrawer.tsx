@@ -8,6 +8,7 @@ import {
   MenuDivider,
   MenuItem,
   MenuList,
+  Spinner,
   Text,
   Tooltip,
   useDisclosure,
@@ -38,7 +39,7 @@ const SideDrawer = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingChat, setLoadingChat] = useState<any>();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { user } = ChatState();
+  const { user, setSelectedChat, chats, setChats } = ChatState();
 
   const navigate = useNavigate();
   const logOutHandler = () => {
@@ -75,7 +76,7 @@ const SideDrawer = () => {
     } catch (error) {
       setLoading(false);
       toast({
-        title: "Error Occured",
+        title: "Error Occurred",
         status: "warning",
         duration: 5000,
         isClosable: true,
@@ -85,16 +86,47 @@ const SideDrawer = () => {
     }
   };
 
-  const accessChat = (userId: string) => {
+  const accessChat = async (userId: string) => {
     try {
       setLoadingChat(true);
+
+      if (!user || !user.data || !user.data.token) {
+        throw new Error("User token is not available");
+      }
+
       const config = {
         headers: {
           "Content-type": "application/json",
-          Authorization: `Bearer ${user?.data.token}`,
+          Authorization: `Bearer ${user.data.token}`,
         },
       };
-    } catch (error) {}
+      const response = await axios.post(
+        `http://localhost:3000/api/chat/access-chat/${userId}`,
+        {}, // Provide an empty object for the body of the POST request
+        config
+      );
+
+      const chatData = response.data.data;
+
+      if (!chats.find((c: any) => c._id === chatData._id)) {
+        setChats([chatData, ...chats]);
+      }
+
+      setSelectedChat(chatData);
+      setLoadingChat(false);
+      onClose();
+    } catch (error) {
+      setLoadingChat(false);
+      console.error("Error fetching the chat:", error);
+      toast({
+        title: "Error fetching the chat",
+
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "top-left",
+      });
+    }
   };
 
   return (
@@ -177,6 +209,7 @@ const SideDrawer = () => {
                 />
               ))
             )}
+            {loadingChat && <Spinner ml="auto" display="flex" />}
           </DrawerBody>
         </DrawerContent>
       </Drawer>
