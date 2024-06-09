@@ -2,6 +2,9 @@ import React from "react";
 import { ChatState } from "../Context/ChatProvider";
 import { Box, IconButton, Text } from "@chakra-ui/react";
 import { FaRegArrowAltCircleLeft } from "react-icons/fa";
+import { getSender, getSenderFull } from "../config/Chatlogics";
+import ProfileModal from "./miscellaneous/ProfileModal";
+import UpdateGroupChat from "./miscellaneous/UpdateGroupChat";
 
 const SingleChats = ({
   fetchAgain,
@@ -32,11 +35,36 @@ const SingleChats = ({
               aria-label={""}
             />
             {!selectChat.isGroupChat ? (
-              <></>
+              <>
+                {getSender(user, selectChat?.users)}{" "}
+                <ProfileModal
+                  user={getSenderFull(user, selectChat.users)}
+                  children={undefined}
+                />
+              </>
             ) : (
-              <>{selectChat?.chatName?.toUpperCase()}</>
+              <>
+                {selectChat?.chatName?.toUpperCase()}
+                <UpdateGroupChat
+                  fetchAgain={fetchAgain}
+                  setFetchAgain={setFetchAgain}
+                />
+              </>
             )}
           </Text>
+          <Box
+            display="flex"
+            flexDir="column"
+            justifyContent="flex-end"
+            p={3}
+            bg="#E8E8E8"
+            w="100%"
+            h="100%"
+            borderRadius="lg"
+            overflow="hidden"
+          >
+            {/* message box */}
+          </Box>
         </>
       ) : (
         <Box h="100%" className="flex justify-center items-center">

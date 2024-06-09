@@ -6,7 +6,7 @@ const ChatProvider: React.FC<any> = ({ children }) => {
   const [selectChat, setSelectedChat] = useState<any>(null);
   const [chats, setChats] = useState<any>([]);
   const navigate = useNavigate();
-  console.log(selectChat, "selected chat");
+  
   useEffect(() => {
     const userInfo = localStorage.getItem("userInfo");
     if (userInfo) {

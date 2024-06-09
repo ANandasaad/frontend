@@ -9,6 +9,7 @@ const UserBadgeItem = ({
   handleFunction: any;
   user: any;
 }) => {
+  console.log(user.name, "user");
   return (
     <Box
       px={2}

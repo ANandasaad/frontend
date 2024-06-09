@@ -17,6 +17,7 @@ import { FaEye } from "react-icons/fa";
 
 const ProfileModal = ({ user, children }: { user: any; children: any }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+
   return (
     <div>
       {children ? (
@@ -38,7 +39,7 @@ const ProfileModal = ({ user, children }: { user: any; children: any }) => {
             justifyContent="center"
             fontSize="40px"
           >
-            {user?.data?.userLogin?.name}
+            {user.data ? user?.data?.userLogin?.name : user?.name}
           </ModalHeader>
           <ModalCloseButton />
           <ModalBody
@@ -52,13 +53,13 @@ const ProfileModal = ({ user, children }: { user: any; children: any }) => {
             <Image
               borderRadius="full"
               boxSize="150px"
-              src={user?.data?.userLogin?.pic}
+              src={user?.data ? user?.data?.userLogin?.pic : user?.pic}
             />
             <Text
               fontSize={{ base: "20px", md: "20px" }}
               fontFamily="Work sans"
             >
-              Email:{user?.data?.userLogin?.email}
+              Email:{user?.data ? user?.data?.userLogin?.email : user?.email}
             </Text>
           </ModalBody>
 
