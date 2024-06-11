@@ -25,9 +25,11 @@ import UserListItem from "../UserListItem";
 const UpdateGroupChat = ({
   fetchAgain,
   setFetchAgain,
+  fetchMessage,
 }: {
   fetchAgain: any;
   setFetchAgain: any;
+  fetchMessage: any;
 }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [groupChatName, setGroupChatName] = useState<string>();
@@ -69,6 +71,7 @@ const UpdateGroupChat = ({
       );
       user1._id === user._id ? setSelectedChat() : setSelectedChat(data?.data);
       setFetchAgain(!fetchAgain);
+      fetchMessage();
       setLoading(false);
     } catch (error) {
       toast({
