@@ -15,7 +15,12 @@ import ProfileModal from "./miscellaneous/ProfileModal";
 import UpdateGroupChat from "./miscellaneous/UpdateGroupChat";
 import axios from "axios";
 import ScrollableChat from "./ScrollableChat";
+import { io, Socket } from "socket.io-client";
+import { DefaultEventsMap } from "@socket.io/component-emitter";
+import { BeatLoader } from "react-spinners";
 
+const ENDPOINT = "http://localhost:3000";
+var socket: Socket<DefaultEventsMap, DefaultEventsMap>, selectChatCompare: any;
 const SingleChats = ({
   fetchAgain,
   setFetchAgain,
@@ -27,8 +32,17 @@ const SingleChats = ({
   const [message, setMessage] = useState<any>([]);
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState<any>();
+  const [socketConnected, setSocketConnected] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const toast = useToast();
-
+  useEffect(() => {
+    socket = io(ENDPOINT);
+    socket.emit("setup", user);
+    socket.on("connected", () => setSocketConnected(true));
+    socket.on("typing", () => setIsTyping(true));
+    socket.on("stop typing", () => setIsTyping(false));
+  }, []);
   const fetchMessage = async () => {
     try {
       if (!selectChat) return;
@@ -42,9 +56,10 @@ const SingleChats = ({
         `http://localhost:3000/api/message/get-message/${selectChat?._id}`,
         config
       );
-      console.log(message);
+
       setMessage(data?.data);
       setLoading(false);
+      socket.emit("join chat", selectChat._id);
     } catch (error) {
       toast({
         title: "Error Occurred!",
@@ -59,6 +74,7 @@ const SingleChats = ({
   };
   const sendMessage = async (e: any) => {
     if (e.key === "Enter" && newMessage) {
+      socket.emit("stop typing", selectChat._id);
       try {
         const config = {
           headers: {
@@ -75,7 +91,7 @@ const SingleChats = ({
           },
           config
         );
-
+        socket.emit("new Message", data?.data);
         setMessage([...message, data.data]);
       } catch (error) {
         toast({
@@ -93,11 +109,40 @@ const SingleChats = ({
     setNewMessage(e.target.value);
 
     //Typing Indicator
+    if (!socketConnected) return;
+    if (!typing) {
+      setTyping(true);
+      socket.emit("typing", selectChat?._id);
+    }
+    let lastTypingTime = new Date().getTime();
+    var timerLength = 3000;
+    setTimeout(() => {
+      var timeNow = new Date().getTime();
+      var timeDiff = timeNow - lastTypingTime;
+      if (timeDiff >= timerLength && typing) {
+        socket.emit("stop typing", selectChat?._id);
+        setTyping(false);
+      }
+    }, timerLength);
   };
 
   useEffect(() => {
     fetchMessage();
+    selectChatCompare = selectChat;
   }, [selectChat]);
+
+  useEffect(() => {
+    socket.on("message received", (newMessageRec) => {
+      if (
+        !selectChatCompare ||
+        selectChatCompare?._id !== newMessageRec.chat?._id
+      ) {
+        //TODO: give notification
+      } else {
+        setMessage([...message, newMessageRec]);
+      }
+    });
+  });
   return (
     <>
       {selectChat ? (
@@ -162,6 +207,11 @@ const SingleChats = ({
               </div>
             )}
             <FormControl onKeyDown={sendMessage} isRequired mt={3}>
+              {isTyping ? (
+                <BeatLoader color="#36d7b7" size={20} className="px-2" />
+              ) : (
+                <></>
+              )}
               <Input
                 variant="filled"
                 bg="#E0E0E0"
